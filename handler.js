@@ -12,7 +12,7 @@ module.exports.getWord = async (event) => {
     return {
       statusCode: 500,
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://tango-generator-4-creative-meetup.netlify.app",
       },
       body: "Error: Cannot get word without 'username'",
     };
@@ -34,7 +34,7 @@ module.exports.getWord = async (event) => {
     return {
       statusCode: 200,
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://tango-generator-4-creative-meetup.netlify.app",
       },
       body: JSON.stringify({ word }),
     };
@@ -43,7 +43,7 @@ module.exports.getWord = async (event) => {
     return {
       statusCode,
       headers: {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": "https://tango-generator-4-creative-meetup.netlify.app",
       },
       body: message,
     };
@@ -55,7 +55,7 @@ module.exports.hello = async (event) => {
   return {
     statusCode: 200,
     headers: {
-      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Origin": "https://tango-generator-4-creative-meetup.netlify.app",
     },
     body: JSON.stringify({ message: "hello", event }),
   };
