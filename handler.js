@@ -6,11 +6,14 @@ const logTable = process.env.logTable;
 const wordTable = process.env.wordTable;
 
 module.exports.getWord = async (event) => {
-  const { username } = event;
+  const { username } = JSON.parse(event.body);
 
   if (!username) {
     return {
       statusCode: 500,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
       body: "Error: Cannot get word without 'username'",
     };
   }
@@ -30,21 +33,30 @@ module.exports.getWord = async (event) => {
 
     return {
       statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
       body: JSON.stringify({ word }),
     };
   } catch (error) {
     const { statusCode, message } = error;
     return {
       statusCode,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
       body: message,
     };
   }
 };
 
-// 実験用API
+// デバッグ用API
 module.exports.hello = async (event) => {
   return {
     statusCode: 200,
-    body: JSON.stringify({ message: event }),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify({ message: "hello", event }),
   };
 };

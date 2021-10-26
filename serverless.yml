@@ -20,8 +20,16 @@ provider:
 functions:
   hello:
     handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
   getWord:
     handler: handler.getWord
+    events:
+      - http:
+          path: getWord
+          method: post
     environment:
       logTable: ${self:provider.environment.DYNAMODB_TABLE}-log
       wordTable: ${self:provider.environment.DYNAMODB_TABLE}-word
