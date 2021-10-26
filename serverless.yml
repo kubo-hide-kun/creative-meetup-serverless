@@ -1,0 +1,70 @@
+service: creative-meetup-oekaki-211028
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  region: ap-northeast-1
+  stage: dev
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: 'Allow'
+          Action:
+            - "dynamodb:*"
+          Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}*"
+
+functions:
+  hello:
+    handler: handler.hello
+  getWord:
+    handler: handler.getWord
+    environment:
+      logTable: ${self:provider.environment.DYNAMODB_TABLE}-log
+      wordTable: ${self:provider.environment.DYNAMODB_TABLE}-word
+
+resources:
+    Resources:
+        # Create DynamoDB to Totalling post log
+        LogDbTable:
+            Type: 'AWS::DynamoDB::Table'
+            Properties:
+                # set Partition Key / Sort Key
+                AttributeDefinitions:
+                    - AttributeName: id
+                      AttributeType: S
+                    - AttributeName: username
+                      AttributeType: S
+                # set the type of key
+                KeySchema:
+                    - AttributeName: id
+                      KeyType: HASH
+                    - AttributeName: username
+                      KeyType: RANGE
+                # set CapacityUnits
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                # set table name
+                TableName: ${self:provider.environment.DYNAMODB_TABLE}-log
+        # Create DynamoDB of Word
+        WordDbTable:
+            Type: 'AWS::DynamoDB::Table'
+            Properties:
+                # set Partition Key / Sort Key
+                AttributeDefinitions:
+                    - AttributeName: word
+                      AttributeType: S
+                # set the type of key
+                KeySchema:
+                    - AttributeName: word
+                      KeyType: HASH
+                # set CapacityUnits
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                # set table name
+                TableName: ${self:provider.environment.DYNAMODB_TABLE}-word
