@@ -32,7 +32,8 @@ functions:
           method: post
     environment:
       logTable: ${self:provider.environment.DYNAMODB_TABLE}-log
-      wordTable: ${self:provider.environment.DYNAMODB_TABLE}-word
+      firstWordTable: ${self:provider.environment.DYNAMODB_TABLE}-first-word
+      lastWordTable: ${self:provider.environment.DYNAMODB_TABLE}-last-word
 
 resources:
     Resources:
@@ -58,8 +59,8 @@ resources:
                     WriteCapacityUnits: 1
                 # set table name
                 TableName: ${self:provider.environment.DYNAMODB_TABLE}-log
-        # Create DynamoDB of Word
-        WordDbTable:
+        # Create DynamoDB of First Word
+        FirstWordDbTable:
             Type: 'AWS::DynamoDB::Table'
             Properties:
                 # set Partition Key / Sort Key
@@ -75,4 +76,22 @@ resources:
                     ReadCapacityUnits: 1
                     WriteCapacityUnits: 1
                 # set table name
-                TableName: ${self:provider.environment.DYNAMODB_TABLE}-word
+                TableName: ${self:provider.environment.DYNAMODB_TABLE}-first-word
+        # Create DynamoDB of Last Word
+        LastWordDbTable:
+            Type: 'AWS::DynamoDB::Table'
+            Properties:
+                # set Partition Key / Sort Key
+                AttributeDefinitions:
+                    - AttributeName: word
+                      AttributeType: S
+                # set the type of key
+                KeySchema:
+                    - AttributeName: word
+                      KeyType: HASH
+                # set CapacityUnits
+                ProvisionedThroughput:
+                    ReadCapacityUnits: 1
+                    WriteCapacityUnits: 1
+                # set table name
+                TableName: ${self:provider.environment.DYNAMODB_TABLE}-last-word
