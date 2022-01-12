@@ -3,8 +3,7 @@
 const AWS = require("aws-sdk");
 const dynamoDB = new AWS.DynamoDB.DocumentClient();
 const logTable = process.env.logTable;
-const firstWordTable = process.env.firstWordTable;
-const lastWordTable = process.env.lastWordTable;
+const wordTable = process.env.wordTable;
 
 module.exports.getWord = async (event) => {
   const { username } = JSON.parse(event.body);
@@ -24,19 +23,14 @@ module.exports.getWord = async (event) => {
     const id = String(Date.now());
     const createdAt = String(new Date());
 
-    const { Items: firstWordList } = await dynamoDB
-      .scan({ TableName: firstWordTable })
-      .promise();
-    const { Items: lastWordList } = await dynamoDB
-      .scan({ TableName: lastWordTable })
-      .promise();
+    const [logRes, wordRes] = await Promise.all([
+      dynamoDB.scan({ TableName: logTable }).promise(),
+      dynamoDB.scan({ TableName: wordTable }).promise(),
+    ]);
+    const { Items: words } = wordRes;
+    const count = logRes.Items.length % words.length;
 
-    const firstWord =
-      firstWordList[Math.floor(Math.random() * firstWordList.length)].word;
-    const lastWord =
-      lastWordList[Math.floor(Math.random() * lastWordList.length)].word;
-
-    const word = `${firstWord}をしている${lastWord}`;
+    const word = words[count].word;
 
     await dynamoDB
       .put({
@@ -71,14 +65,39 @@ module.exports.getWord = async (event) => {
   }
 };
 
-// デバッグ用API
-module.exports.hello = async (event) => {
-  return {
-    statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin":
-        "https://tango-generator-4-creative-meetup.netlify.app",
-    },
-    body: JSON.stringify({ message: "hello", event }),
-  };
+module.exports.getLogAll = async () => {
+  try {
+    const { Items } = await dynamoDB.scan({ TableName: logTable }).promise();
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ Items }),
+    };
+  } catch (error) {
+    const { statusCode, message } = error;
+    return {
+      statusCode,
+      headers: {
+        "Access-Control-Allow-Origin":
+          "https://tango-generator-4-creative-meetup.netlify.app",
+      },
+      body: message,
+    };
+  }
+};
+
+// 単語を投稿する。
+module.exports.postWords = async () => {
+  const words = [];
+  const requests = words.map((word) =>
+    dynamoDB
+      .put({
+        TableName: wordTable,
+        Item: { word },
+      })
+      .promise()
+  );
+  await Promise.all(requests);
 };
